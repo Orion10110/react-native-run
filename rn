@@ -12,10 +12,6 @@ watchmanClear="watchman watch-del-all"
 helpInfo="
 RN script info
 
-Notify
-notify title body soung
-notofyRN title body
-
 Clear Cashe
 rn start c - equel to 'npm start -- --reset-cache'
 rn clean - clean watchman then run metro with cache cleaning
