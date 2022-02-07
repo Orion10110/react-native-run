@@ -1,0 +1,180 @@
+#!/bin/zsh
+
+if [ -f ./rn_consts ]; then
+    source ./rn_consts
+else
+    print "404: rn_consts not found."
+fi
+
+displayNotification() {
+  osascript -e "display notification \"$2\" with title \"$1\" sound name \"$3\""
+}
+
+notify() {
+  displayNotification $2 $1 Submarine
+}
+
+rnClearCashe() {
+    var=$PWD
+    osascript -e "tell app \"Terminal\"
+        do script \"cd $var && npm start -- --reset-cache\"
+    end tell"
+}
+
+rnStartMetro() {
+    var=$PWD
+    osascript -e "tell app \"Terminal\"
+        do script \"cd $var && npm start\"
+    end tell"
+}
+
+rnStart() {
+    if [ -n "$1" ] && [ "$1"  = 'start' ]
+    then
+        if [ -z "$2" ]
+        then
+            rnStartMetro
+            notify Metro "run"
+            return 1
+        fi
+
+        if [ -n "$2"] && [ "$2" = 'c' ]
+        then
+            rnClearCashe
+            notify "Metro" "cache clean and run"
+            return 1
+        fi
+
+    fi
+}
+
+rnClear() {
+    if [ -n "$1" ] && [ "$1"  = 'clean' ]
+    then
+        if [ -n "$2" ] && [ "$2"  = 'f' ]
+        then
+            zsh -c $rnFullClear
+            rnClearCashe
+            notify Metro "Cache clean and npm reinstall"
+        else
+            zsh -c $watchmanClear
+            rnClearCashe
+            notify "Watchman and Cache" "cleaned"
+        fi
+    fi
+}
+
+rnIos() {
+    if [ -n "$1" ] && [ "$1"  = 'ios' ]
+    then
+        if [ -n "$2" ] && [ "$2" = "pods" ]
+        then
+            zsh -c $rnPods
+            notify "Npm and Pods" "Was installed"
+            return 1
+        fi
+        if [ -n "$2" ] && [ "$2" = "fullRun" ]
+        then
+            zsh -c $iosFullRun
+            notify Ios "Was installed"
+            return 1
+        fi
+        if [ -z "$2" ]
+        then
+            zsh -c "npm run ios"
+            notify Ios "Was run"
+            return 1
+        fi
+    fi
+}
+
+rnAndroid() {
+    if [ -n "$1" ] && [ "$1"  = 'android' ]
+    then
+        if [ -n "$2" ] && [ "$2" = 'gc' ]
+        then
+            zsh -c "cd android && ./gradlew clean && cd .."
+            notify Android "Was cleaned"
+        fi
+        if [ -n "$2" ] && [ "$2" = 'adb' ]
+        then 
+            zsh -c "adb reverse tcp:8081 tcp:8081"
+            return 1
+        fi
+        if [ -z "$2" ]
+        then
+            zsh -c "npm run android"
+            notify Android "Was run"
+            return 1
+        fi
+    fi
+}
+
+rnTests() {
+    if [ -n "$1" ] && [ "$1"  = 'test' ]
+    then
+        if [ -n "$2" ] && [ "$2"  = 'o' ]
+        then
+            zsh -c "npm test -- -u -o"
+            notify Tests "Was tested"
+            return 1
+        fi
+        if [ -n "$2" ] && [ -n "$3" ] && [ "$2"  = 'c' ]
+        then
+            zsh -c "npm test -- $3 -u"
+            notify Tests "Was tested"
+            return 1
+        fi
+        if [ -z "$2" ]
+        then
+            zsh -c "npm test -- -u"
+            notify Tests "Was tested"
+            return 1
+        fi
+    fi
+}
+
+rnHelp() {
+    if [ -n "$1" ] && [ "$1"  = 'help' ]
+    then
+        echo $helpInfo
+    fi
+}
+
+rnQuality() {
+    if [ -n "$1" ] && [ "$1"  = 'lint' ]
+    then
+        zsh -c $lintcheck
+        notify Tests "Was checked"
+        return 1
+    fi
+    if [ -n "$1" ] && [ "$1"  = 'type' ]
+    then
+        zsh -c $typecheck
+        notify Tests "Was checked"
+        return 1
+    fi
+    if [ -n "$1" ] && [ "$1"  = 'quality' ]
+    then
+        zsh -c $typecheck
+        zsh -c $lintcheck
+        notify Tests "Was checked"
+        return 1
+    fi
+}
+
+rn() {
+    rnQuality $1 $2
+    rnClear $1 $2
+    rnIos $1 $2
+    rnAndroid $1 $2
+    rnTests $1 $2 $3
+    rnHelp $1
+    rnStart $1 $2
+    if [ -z "$1" ]
+    then 
+        rnHelp help
+    fi
+}
+
+rn $1 $2 $3 $4
