@@ -1,10 +1,54 @@
 #!/bin/zsh
 
-if [ -f ./rn_consts ]; then
-    source ./rn_consts
-else
-    print "404: rn_consts not found."
-fi
+# commands
+typecheck="npx tsc --noemit --skipLibCheck"
+lintcheck="npm run lint"
+rnPods='npm i && cd ios && pod install && cd ..'
+iosFullRun='npm i && cd ios && pod install && cd .. && npm run ios'
+rnFullClear="watchman watch-del-all && rm -rf node_modules/ && npm cache verify && npm install"
+watchmanClear="watchman watch-del-all"
+
+# help
+helpInfo="
+RN script info
+
+Notify
+notify title body soung
+notofyRN title body
+
+Clear Cashe
+rn start c - equel to 'npm start -- --reset-cache'
+rn clean - clean watchman then run metro with cache cleaning
+rn clean f - clean full cache, cleam watchman then remove node_modules then npm cache verify and npm install
+
+Ios
+rn ios - run ios
+rn ios pods - install npm packages then install pods
+rn ios fullRun - install npm packages then install pods than run ios
+
+Android
+rn android gc - clean gradlew
+rn android adb - equel to 'adb reverse tcp:8081 tcp:8081'
+rn android - run android
+
+Tests
+rn test -- equel to npm test -- -u
+rn test o -- equel to npm test -- -u -o
+rn test c -- equel to npm test -- -u Component
+
+Quality
+rn quality - check lint and typescript
+rn lint - check lint
+rn type - check typescript
+
+Start
+rn start - start metro
+rn start c - start metro with clear cache
+
+
+Help
+rn help - help
+"
 
 displayNotification() {
   osascript -e "display notification \"$2\" with title \"$1\" sound name \"$3\""
