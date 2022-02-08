@@ -23,14 +23,14 @@ rn ios pods - install npm packages then install pods
 rn ios fullRun - install npm packages then install pods than run ios
 
 Android
+rn android - run android
 rn android gc - clean gradlew
 rn android adb - equel to 'adb reverse tcp:8081 tcp:8081'
-rn android - run android
 
 Tests
 rn test -- equel to npm test -- -u
 rn test o -- equel to npm test -- -u -o
-rn test c -- equel to npm test -- -u Component
+rn test c {Component} -- equel to npm test -- -u Component
 
 Quality
 rn quality - check lint and typescript
@@ -71,20 +71,18 @@ rnStartMetro() {
 rnStart() {
     if [ -n "$1" ] && [ "$1"  = 'start' ]
     then
+        if [ -n "$2" ] && [ "$2" = 'c' ]
+        then
+            rnClearCashe
+            notify "Metro" "cache clean and run"
+            return 1
+        fi
         if [ -z "$2" ]
         then
             rnStartMetro
             notify Metro "run"
             return 1
         fi
-
-        if [ -n "$2"] && [ "$2" = 'c' ]
-        then
-            rnClearCashe
-            notify "Metro" "cache clean and run"
-            return 1
-        fi
-
     fi
 }
 
